@@ -16,7 +16,7 @@ final class CoinTable(tag: Tag) extends Table[Coin](tag, "coin") {
 }
 
 @Singleton
-class CoinsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) {
+class CoinDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
   val coins = TableQuery[CoinTable]
 
