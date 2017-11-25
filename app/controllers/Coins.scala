@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import models.CoinDAO
+import models.db.CoinDAO
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 
 import scala.concurrent.ExecutionContext

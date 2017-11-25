@@ -1,4 +1,4 @@
-package models
+package models.db
 
 import java.sql.Timestamp
 import javax.inject.{Inject, Singleton}
@@ -25,8 +25,13 @@ final class HistoricalPricesTable(tag: Tag) extends Table[HistoricalPrice](tag, 
 class HistoricalPriceDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) {
 
   val prices = TableQuery[HistoricalPricesTable]
+  val db = dbConfigProvider.get.db
 
   def findAll(): Future[Seq[HistoricalPrice]] = {
-    dbConfigProvider.get.db.run(prices.result)
+    db.run(prices.result)
+  }
+
+  def insert(newPrices: HistoricalPrice*): Unit = {
+    db.run(prices ++= newPrices)
   }
 }

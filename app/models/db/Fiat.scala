@@ -1,4 +1,4 @@
-package models
+package models.db
 
 import javax.inject.{Inject, Singleton}
 
@@ -7,12 +7,13 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
-final case class Fiat(slug: String) {}
+final case class Fiat(slug: String, name: String) {}
 
 final class FiatTable(tag: Tag) extends Table[Fiat](tag, "fiat") {
   def slug = column[String]("slug", O.PrimaryKey)
+  def name = column[String]("name")
 
-  def * = slug.mapTo[Fiat]
+  def * = (slug, name).mapTo[Fiat]
 }
 
 @Singleton

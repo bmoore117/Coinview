@@ -1,4 +1,4 @@
-package models
+package models.db
 
 import javax.inject.{Inject, Singleton}
 
@@ -7,12 +7,13 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
-final case class Currency(slug: String) {}
+final case class Currency(slug: String, name: String) {}
 
 final class CurrencyTable(tag: Tag) extends Table[Currency](tag, "currency") {
   def slug = column[String]("slug", O.PrimaryKey)
+  def name = column[String]("name")
 
-  def * = slug.mapTo[Currency]
+  def * = (slug, name).mapTo[Currency]
 }
 
 @Singleton

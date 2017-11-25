@@ -1,4 +1,4 @@
-package models
+package models.db
 
 import java.sql.Timestamp
 import javax.inject.{Inject, Singleton}

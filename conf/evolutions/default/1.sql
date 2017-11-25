@@ -7,7 +7,8 @@ create table users (
 
 --inheritance based approach to types of currency
 create table currency (
-    slug varchar(5) primary key
+    slug varchar(5) primary key,
+    name varchar(20)
 );
 create table fiat (slug varchar(5) primary key) inherits (currency);
 create table coin (slug varchar(5) primary key) inherits (currency);
