@@ -38,15 +38,8 @@ class FetchPriceTask @Inject()(actorSystem: ActorSystem, ws: WSClient, coinsDao:
             })
 
             None
-          }, instance => Some(HistoricalPrice(coin.slug, new Timestamp(instance.lastUpdated), instance.priceUsd, "USD")))
+          }, instance => pricesDAO.insert(HistoricalPrice(coin.slug, new Timestamp(instance.lastUpdated), instance.priceUsd, "USD")))
         })
-
-        for {
-          priceOpt <- priceFuture
-          value <- priceOpt
-        } yield {
-          pricesDAO.insert(value)
-        }
       }
     })
   })

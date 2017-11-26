@@ -7,14 +7,11 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.3"
 
-libraryDependencies += ws
-libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
-
-// https://mvnrepository.com/artifact/org.postgresql/postgresql
-libraryDependencies += "org.postgresql" % "postgresql" % "42.1.4"
-
 libraryDependencies ++= Seq(
+  ws,
+  guice,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+  "org.postgresql" % "postgresql" % "42.1.4",
   "com.typesafe.play" %% "play-slick" % "3.0.1",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.1"
 )
