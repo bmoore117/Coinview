@@ -39,11 +39,7 @@ create table historical_prices (
     constraint price_type_fk foreign key (price_units) references currency(slug)
 );
 
-insert into currency values ('USD', 'Dollar');
 insert into fiat values ('USD', 'Dollar');
-insert into currency values ('BTC', 'Bitcoin');
 insert into coin values ('BTC', 'Bitcoin');
-insert into currency values ('ETH', 'Ethereum');
 insert into coin values ('ETH', 'Ethereum');
-insert into currency values ('BCH', 'Bitcoin Cash');
 insert into coin values ('BCH', 'Bitcoin Cash');
