@@ -23,6 +23,8 @@ final class HistoricalPricesTable(tag: Tag) extends Table[HistoricalPrice](tag, 
   def * = (coinSlug, priceDate, price, priceUnits).mapTo[HistoricalPrice]
 }
 
+//TODO: set up custom execution context for db
+
 @Singleton
 class HistoricalPriceDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
 
