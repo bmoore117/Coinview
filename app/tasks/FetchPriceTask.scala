@@ -76,6 +76,7 @@ class FetchPriceTask @Inject()(actorSystem: ActorSystem, ws: WSClient, coinsDao:
           errors.foreach(tuple => {
             errorMsg += "Error while parsing: " + tuple._1.toString() + "\nFailed Paths: "
             tuple._2.foreach(error => errorMsg += "\t" + error.message)
+            errorMsg += "\n"
           })
           val failure = new FailedJSONParse(errorMsg)
           Logger.error(errorMsg, failure)
