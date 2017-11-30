@@ -3,6 +3,7 @@ package models.db
 import java.sql.Timestamp
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.PostgresProfile.api._
 
@@ -32,6 +33,6 @@ class HistoricalPriceDAO @Inject() (protected val dbConfigProvider: DatabaseConf
   }
 
   def insert(newPrices: HistoricalPrice*): Unit = {
-    db.run(prices ++= newPrices)
+    db.run(prices ++= newPrices).recover { case exception: Throwable => Logger.error("Insert failed", exception) }
   }
 }

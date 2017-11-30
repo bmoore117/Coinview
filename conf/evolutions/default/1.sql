@@ -36,7 +36,7 @@ create table historical_prices (
 
     constraint historical_purchases_pk primary key (coin_slug, price_date),
     constraint coin_type_fk foreign key (coin_slug) references coin(slug),
-    constraint price_type_fk foreign key (price_units) references currency(slug)
+    constraint price_type_fk foreign key (price_units) references fiat(slug)
 );
 
 insert into fiat values ('USD', 'Dollar');
