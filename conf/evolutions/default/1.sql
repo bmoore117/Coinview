@@ -14,7 +14,6 @@ create table fiat (slug varchar(5) primary key) inherits (currency);
 create table coin (slug varchar(5) primary key) inherits (currency);
 
 create table purchases (
-    id integer primary key,
     user_id integer,
     coin_slug varchar(5),
     coin_amount double precision,
@@ -22,9 +21,10 @@ create table purchases (
     purchase_currency_slug varchar(5),
     purchase_currency_amount double precision,
 
+    constraint user_date_pk primary key (user_id, purchase_date),
     constraint user_id_fk foreign key (user_id) references users(id),
     constraint coin_type_fk foreign key (coin_slug) references coin(slug),
-    constraint currency_type_fk foreign key (purchase_currency_slug) references currency(slug),
+    constraint currency_type_fk foreign key (purchase_currency_slug) references fiat(slug),
     check (coin_slug <> purchase_currency_slug)
 );
 

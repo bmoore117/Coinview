@@ -3,17 +3,29 @@ package models.db
 import java.sql.Timestamp
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.json._
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
-final case class Purchase(id: Int, userId: Long, coinSlug: String, coinAmount: Double, purchaseDate: Timestamp,
-                          purchaseCurrencySlug: String, purchaseCurrencyAmount: Double) {}
+final case class Purchase(userId: Long, coinSlug: String, coinAmount: Double, purchaseDate: Timestamp,
+                          purchaseCurrencySlug: String, purchaseCurrencyAmount: Double)
+
+object Purchase extends ((Long, String, Double, Timestamp, String, Double) => Purchase) {
+
+  implicit val timestampFormat: Format[Timestamp] = new Format[Timestamp] {
+    def writes(t: Timestamp): JsNumber = JsNumber(t.getTime)
+    def reads(json: JsValue): JsResult[Timestamp] = JsSuccess(new Timestamp(json.as[Long]))
+  }
+
+  implicit val tickerReads: Reads[Purchase] = Json.reads[Purchase]
+}
 
 final class PurchasesTable(tag: Tag) extends Table[Purchase](tag, "purchases") {
-  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
   def userId = column[Long]("user_id")
   def coinSlug = column[String]("coin_slug")
   def coinAmount = column[Double]("coin_amount")
@@ -21,15 +33,26 @@ final class PurchasesTable(tag: Tag) extends Table[Purchase](tag, "purchases") {
   def purchaseCurrencySlug = column[String]("purchase_currency_slug")
   def purchaseCurrencyAmount = column[Double]("purchase_currency_amount")
 
-  def * = (id, userId, coinSlug, coinAmount, purchaseDate, purchaseCurrencySlug, purchaseCurrencyAmount).mapTo[Purchase]
+  def * = (userId, coinSlug, coinAmount, purchaseDate, purchaseCurrencySlug, purchaseCurrencyAmount).mapTo[Purchase]
 }
 
 @Singleton
-class PurchaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) {
+class PurchaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
 
   val purchases = TableQuery[PurchasesTable]
+  val db = dbConfigProvider.get.db
 
   def findAll(): Future[Seq[Purchase]] = {
-    dbConfigProvider.get.db.run(purchases.result)
+    db.run(purchases.result).recover {
+      case exception: Throwable => Logger.error("findAll failed", exception)
+        return Future.failed(exception)
+    }
+  }
+
+  def insert(newPurchases: Purchase*): Future[PostgresProfile.InsertActionExtensionMethods[PurchasesTable#TableElementType]#MultiInsertResult] = {
+    db.run(purchases ++= newPurchases).recover {
+      case exception: Throwable => Logger.error("insert failed", exception)
+        return Future.failed(exception)
+    }
   }
 }
