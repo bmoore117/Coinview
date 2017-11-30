@@ -10,6 +10,7 @@ import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 final case class Purchase(userId: Long, coinSlug: String, coinAmount: Double, purchaseDate: Timestamp,
@@ -43,16 +44,18 @@ class PurchaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
   val db = dbConfigProvider.get.db
 
   def findAll(): Future[Seq[Purchase]] = {
-    db.run(purchases.result).recover {
-      case exception: Throwable => Logger.error("findAll failed", exception)
-        return Future.failed(exception)
+    db.run(purchases.result).transform {
+      case Success(s) => Success(s)
+      case Failure(exception) => Logger.error("findAll failed", exception)
+        Failure(exception)
     }
   }
 
   def insert(newPurchases: Purchase*): Future[PostgresProfile.InsertActionExtensionMethods[PurchasesTable#TableElementType]#MultiInsertResult] = {
-    db.run(purchases ++= newPurchases).recover {
-      case exception: Throwable => Logger.error("insert failed", exception)
-        return Future.failed(exception)
+    db.run(purchases ++= newPurchases).transform {
+      case Success(s) => Success(s)
+      case Failure(exception) => Logger.error("insert failed", exception)
+        Failure(exception)
     }
   }
 }

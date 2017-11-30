@@ -6,10 +6,13 @@ import models.db.{Purchase, PurchaseDAO}
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 
-@Singleton
-class PurchaseController @Inject()(cc: ControllerComponents, purchaseDAO: PurchaseDAO) extends AbstractController(cc) {
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
-  def create = Action { implicit request: Request[AnyContent] =>
+@Singleton
+class PurchaseController @Inject()(cc: ControllerComponents, purchaseDAO: PurchaseDAO)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+
+  def create = Action.async { implicit request: Request[AnyContent] =>
     val json = request.body.asJson.get
     val result = Json.fromJson[Purchase](json)
 
@@ -20,10 +23,14 @@ class PurchaseController @Inject()(cc: ControllerComponents, purchaseDAO: Purcha
         tuple._2.foreach(error => errorMsg += "\t" + error.message)
         errorMsg += "\n"
       })
-      BadRequest(errorMsg)
+      Future {
+        BadRequest(errorMsg)
+      }
     }, success => {
-      purchaseDAO.insert(success)
-      Ok
+      purchaseDAO.insert(success).transform {
+        case Success(_) => Success(Ok("Created"))
+        case Failure(exception) => Success(BadRequest(exception.toString))
+      }
     })
   }
 }

@@ -9,6 +9,7 @@ import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 final case class HistoricalPrice(coinSlug: String, price_date: Timestamp, price: Double, priceUnits: String) {}
 
@@ -32,16 +33,18 @@ class HistoricalPriceDAO @Inject() (protected val dbConfigProvider: DatabaseConf
   val db = dbConfigProvider.get.db
 
   def findAll(): Future[Seq[HistoricalPrice]] = {
-    db.run(prices.result).recover {
-      case exception: Throwable => Logger.error("findAll failed", exception)
-        return Future.failed(exception)
+    db.run(prices.result).transform {
+      case Success(s) => Success(s)
+      case Failure(exception) => Logger.error("findAll failed", exception)
+        Failure(exception)
     }
   }
 
   def insert(newPrices: HistoricalPrice*): Future[PostgresProfile.InsertActionExtensionMethods[HistoricalPricesTable#TableElementType]#MultiInsertResult] = {
-    db.run(prices ++= newPrices).recover {
-      case exception: Throwable => Logger.error("insert failed", exception)
-        return Future.failed(exception)
+    db.run(prices ++= newPrices).transform {
+      case Success(s) => Success(s)
+      case Failure(exception) => Logger.error("insert failed", exception)
+        Failure(exception)
     }
   }
 }
